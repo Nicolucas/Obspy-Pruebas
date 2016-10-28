@@ -1,0 +1,56 @@
+# -*- coding: utf-8 -*-
+"""
+Editor de Spyder
+
+Este es un archivo temporal
+"""
+
+from obspy import UTCDateTime
+from obspy import Trace
+from obspy import Stream
+import numpy as np
+import sys
+from obspy.segy.segy import SEGYTraceHeader, SEGYBinaryFileHeader
+from obspy.core import AttribDict
+
+#UTCDateTime(2012, 9, 7, 12, 15, 0)
+
+#singlechannel = read('https://examples.obspy.org/COP.BHZ.DK.2009.050')
+#singlechannel[0].plot()
+x = np.linspace(-np.pi, 2*np.pi, 51)
+zeros=np.zeros(51)
+#synthchannel=Trace(data=np.sin(x+1))
+#synthchannel.stats.delta = 1.0
+#synthchannel.stats.location = 
+#synthchannel.id=
+streamtot=Stream()
+
+for i in range(51):
+    dato = np.sin(x+i*.1)
+    dato = np.require(dato, dtype=np.float32)
+    
+    
+    
+    traces=Trace(data=dato)
+    traces.stats.delta=0.01
+    if not hasattr(traces.stats, 'segy.trace_header'):
+        traces.stats.segy = {}
+    traces.stats.segy.trace_header = SEGYTraceHeader()
+    traces.stats.segy.trace_header.trace_sequence_number_within_line = i + 1
+
+    streamtemp=Stream(traces)
+    
+    streamtot+=streamtemp
+    
+    
+
+streamtot.stats = AttribDict()
+streamtot.stats.textual_file_header = 'Textual Header'
+streamtot.stats.binary_file_header = SEGYBinaryFileHeader()
+streamtot.stats.binary_file_header.trace_sorting_code = 5   
+
+print("Stream object before writing...")
+streamtot.plot()
+#streamtot.write('file.sgy', format='SEGY', data_encoding=1, byteorder=sys.byteorder)
+#streamtot.write('file.segy', format='SEGY')
+streamtot.write('file2.segy', format='SEGY', data_encoding=1, byteorder=sys.byteorder)
